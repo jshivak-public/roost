@@ -1,0 +1,12 @@
+import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowUpRight, FileText } from 'lucide-react'
+import { usePortal } from '../context'
+import { displayDate } from '../lib/ledger'
+export function PortalLink({ to, children, className = '' }: { to: string; children: ReactNode; className?: string }) { const { selectedId } = usePortal(); return <Link className={className} to={`${to}${to.includes('?') ? '&' : '?'}sublease=${encodeURIComponent(selectedId)}`}>{children}</Link> }
+export function Status({ children }: { children: ReactNode }) { const text = String(children).toLowerCase(); return <span className={`portal-status ${/acknowledged|settled|resolved|active|approved/.test(text) ? 'positive' : /disputed|overdue|declined/.test(text) ? 'negative' : /pending|reported|waiting|draft|progress/.test(text) ? 'pending' : ''}`}>{children}</span> }
+export function PageHeading({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: ReactNode }) { return <div className="portal-page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>{action}</div> }
+export function Panel({ title, action, children, className = '' }: { title: string; action?: ReactNode; children: ReactNode; className?: string }) { return <section className={`portal-panel ${className}`}><div className="portal-panel-heading"><h2>{title}</h2>{action}</div>{children}</section> }
+export function Empty({ children }: { children: ReactNode }) { return <div className="portal-empty">{children}</div> }
+export function DocumentTeaser() { return <div className="portal-doc-teaser"><span className="portal-square-icon"><FileText size={21} /></span><div><strong>Sublease agreement</strong><span>Awaiting an actual shared document</span></div><PortalLink to="/portal/documents" className="icon-button"><ArrowUpRight size={19} /><span className="sr-only">Open documents</span></PortalLink></div> }
+export function Activity() { const { state, selectedId } = usePortal(); const activity = state.audit.filter(a => a.agreementId === selectedId).slice(0, 5); return <div className="portal-activity">{activity.length ? activity.map(a => <div key={a.id}><span className="activity-dot" /><div><p>{a.text}</p><small>{displayDate(a.time)}</small></div></div>) : <Empty>New activity will appear here as you manage your sublease.</Empty>}</div> }

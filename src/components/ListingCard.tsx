@@ -1,0 +1,10 @@
+import { Bookmark, MapPin, ArrowUpRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import type { Listing } from '../types'
+import { useMarketplace } from '../hooks/useMarketplace'
+import { compatibility, money, date } from '../lib/matching'
+export function MatchBadge({ listing }: { listing: Listing }) { const { store } = useMarketplace(); const match = compatibility(store.profile, listing); return <span className={`match-badge ${match.conflicts.length ? 'conflict' : ''}`}>{match.conflicts.length ? 'Preference conflict' : match.score === null ? 'Build your match' : `✧ ${match.score}% lifestyle match`}</span> }
+export function ListingCard({ listing, compare, selected }: { listing: Listing; compare?: () => void; selected?: boolean }) {
+  const { store, toggleSave } = useMarketplace()
+  return <article className="listing-tile"><div className="tile-image"><Link to={`/listing/${listing.id}`}><img src={listing.photos[0]} alt={`Living space in ${listing.area}`} loading="lazy" /></Link><span className="image-label">{listing.type}</span><button className={`photo-save ${store.saved.includes(listing.id) ? 'saved' : ''}`} aria-label={store.saved.includes(listing.id) ? 'Unsave listing' : 'Save listing'} onClick={() => toggleSave(listing.id)}><Bookmark size={18} fill={store.saved.includes(listing.id) ? 'currentColor' : 'none'} /></button></div><div className="tile-body"><div className="row between"><strong>{money(listing.price)}<span className="price-unit"> / month</span></strong><span className="demo-label">DEMO</span></div><Link className="tile-title" to={`/listing/${listing.id}`}>{listing.title}<ArrowUpRight size={16} /></Link><p className="muted text-sm"><MapPin size={13} />{listing.area} · {listing.distance} mi to campus</p><div className="row between tile-bottom"><span className="text-sm">{date(listing.start)} – {date(listing.end)}</span><MatchBadge listing={listing} /></div>{compare && <label className="compare-check"><input type="checkbox" checked={selected} onChange={compare} /> Compare this space</label>}</div></article>
+}

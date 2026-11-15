@@ -1,0 +1,12 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Bookmark, ArrowRight } from 'lucide-react'
+import { useMarketplace } from '../hooks/useMarketplace'
+import { ListingCard, MatchBadge } from '../components/ListingCard'
+import { Button } from '../components/ui/button'
+import { Dialog } from '../components/ui/dialog'
+import { money, date } from '../lib/matching'
+export default function Saved() {
+  const { store } = useMarketplace(); const [selected, setSelected] = useState<string[]>([]); const [open, setOpen] = useState(false); const listings = store.listings.filter(l => store.saved.includes(l.id)); const comparison = listings.filter(l => selected.includes(l.id))
+  return <div className="page saved-page"><div className="section-heading"><div><span className="eyebrow">THE ONES THAT FELT RIGHT</span><h1>Your shortlist.</h1><p className="muted">A few possibilities for your next chapter.</p></div><Button variant="outline" disabled={comparison.length < 2} onClick={() => setOpen(true)}>Compare {comparison.length || ''} spaces</Button></div>{listings.length ? <div className="listing-grid">{listings.map(l => <ListingCard key={l.id} listing={l} selected={selected.includes(l.id)} compare={() => setSelected(s => s.includes(l.id) ? s.filter(x => x !== l.id) : [...s.slice(-2), l.id])} />)}</div> : <div className="empty-state"><Bookmark size={40} /><h2>Leave a little room for possibility.</h2><p>Like or save a space, and it’ll be waiting here.</p><Button asChild><Link to="/discover">Find a place <ArrowRight size={17} /></Link></Button></div>}<Dialog open={open} onOpenChange={setOpen} title="Side by side." description="Compare up to three saved spaces." wide><div className="comparison-scroll"><table className="comparison"><thead><tr><th>THE DETAILS</th>{comparison.map(l => <th key={l.id}><img src={l.photos[0]} alt={l.area} /><Link to={`/listing/${l.id}`}>{l.title}</Link></th>)}</tr></thead><tbody>{['Monthly rent', 'Availability', 'Campus distance', 'Space', 'Roommates', 'Utilities', 'Lifestyle'].map(label => <tr key={label}><th>{label}</th>{comparison.map(l => <td key={l.id}>{label === 'Monthly rent' ? money(l.price) : label === 'Availability' ? `${date(l.start)} – ${date(l.end)}, ${l.start.slice(0, 4)}` : label === 'Campus distance' ? `${l.distance} mi` : label === 'Space' ? l.type : label === 'Roommates' ? l.roommates : label === 'Utilities' ? l.utilities ? 'Included' : 'Separate' : <MatchBadge listing={l} />}</td>)}</tr>)}</tbody></table></div></Dialog></div>
+}
